@@ -56,12 +56,13 @@ zinit cdreplay -q
 bindkey -e
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
-bindkey '^[w' kill-region
-
 bindkey ' ' magic-space                           # do history expansion on space
+
+bindkey '^[w' kill-region						  # alt + w : cut text between mark and cursor
 bindkey '^U' backward-kill-line                   # ctrl + U
-bindkey '^[[3;5~' kill-word                       # ctrl + Supr
+bindkey '^[[3;5~' kill-word                       # ctrl + del : Kill word ahead of cursor
 bindkey '^[[3~' delete-char                       # delete
+
 bindkey '^[[1;5C' forward-word                    # ctrl + ->
 bindkey '^[[1;5D' backward-word                   # ctrl + <-
 bindkey '^[[5~' beginning-of-buffer-or-history    # page up
