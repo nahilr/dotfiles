@@ -12,9 +12,17 @@
         "color": "cyan"
     },
     "modules": [
+		{
+            "type": "custom", // HardwareStart
+            "format": "┌────────────────────────────────────────────────────────┐"
+        },
+        {
+            "type": "title",
+            "format": "├ {user-name-colored}{at-symbol-colored}{host-name-colored}                                    │"
+        },
         {
             "type": "custom", // HardwareStart
-            "format": "┌─────────── \u001b[1mHardware Information\u001b[0m ───────────┐" // `\u001b` is `\033`, or `\e`
+            "format": "├─────────── \u001b[1mHardware Information\u001b[0m ───────────────────────┤" // `\u001b` is `\033`, or `\e`
         },
         {
             "type": "host",
@@ -42,8 +50,12 @@
             "key": "  "
         },
         {
+            "type": "sound",
+            "key": "  "
+        },
+        {
             "type": "custom", // SoftwareStart
-            "format": "├─────────── \u001b[1mSoftware Information\u001b[0m ───────────┤"
+            "format": "├─────────── \u001b[1mSoftware Information\u001b[0m ───────────────────────┤"
         },
         {
             "type": "os",
@@ -81,7 +93,7 @@
         },
         {
             "type": "custom",
-            "format": "|──────────────\u001b[1mUptime / Age\u001b[0m──────────────────|"
+            "format": "├──────────────\u001b[1mUptime / Age\u001b[0m──────────────────────────────┤"
         },
         {
             "type": "command",
@@ -96,7 +108,7 @@
         },
         {
             "type": "custom", // InformationEnd
-            "format": "└────────────────────────────────────────────┘"
+            "format": "└────────────────────────────────────────────────────────┘"
         },
         {
             "type": "colors",
