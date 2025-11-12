@@ -1,3 +1,46 @@
+# For benchmarking (Uncomment below line and last line)
+# zmodload zsh/zprof
+#####################################
+# Environment
+#####################################
+
+# If 'micro' is installed
+if command -v micro >/dev/null 2>&1; then
+  export EDITOR=micro
+else
+  export EDITOR=nano
+fi
+
+# Set VISUAL to be the same as EDITOR
+export VISUAL="$EDITOR"
+
+#export TERM=xterm-256color
+
+export BUN_INSTALL="$HOME/.bun"
+
+typeset -U path
+path=(
+    "$HOME/.bun/bin"
+    "$HOME/go/bin"
+    "$HOME/.cargo/bin"
+    "$HOME/.local/bin"
+    "$HOME/.spicetify"
+    $path
+)
+export PATH
+
+# Source local environment file
+if [ -f "$HOME/.local/bin/env" ]; then
+    . "$HOME/.local/bin/env"
+fi
+
+#export NVM_DIR="$HOME/.nvm"
+#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+######################################
+# ZINIT
+######################################
 # Set the directory we want to store zinit and plugins
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
@@ -10,12 +53,7 @@ fi
 # Source/Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
-if [ -f /usr/bin/fastfetch ]; then
-	fastfetch
-fi
-
 # Add in zsh plugins
-zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
@@ -26,15 +64,16 @@ zinit snippet OMZP::git
 zinit snippet OMZP::sudo
 zinit snippet OMZP::command-not-found
 
-# Load completions
-autoload -Uz compinit && compinit
-compinit -d ~/.cache/zcompdump
+#####################################
+# Completions
+#####################################
+# Load completions styling
 zstyle ':completion:*:*:*:*:*' menu select
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete
 zstyle ':completion:*' format 'Completing %d'
 zstyle ':completion:*' group-name ''
-zstyle ':completion:*' list-colors ''
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' rehash true
@@ -42,23 +81,33 @@ zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p
 zstyle ':completion:*' use-compctl false
 zstyle ':completion:*' verbose true
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 
-# Completion styling
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' menu no
+# fzf-tab styling
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
+# bun completions
+[ -s "/home/neo/.bun/_bun" ] && source "/home/neo/.bun/_bun"
+
+# LOAD COMPLETIONS
+# autoload -Uz compinit && compinit
+# compinit -d ~/.cache/zcompdump
+
+# Using zinit to load completions
+zinit ice atinit"zicompinit; zicdreplay"
+
+zinit light zsh-users/zsh-syntax-highlighting
 zinit cdreplay -q
 
+##### Shell Configs
 # Keybindings
 bindkey -e
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 bindkey ' ' magic-space                           # do history expansion on space
 
-bindkey '^[w' kill-region			  # alt + w : cut text between mark and cursor
+bindkey '^[w' kill-region						  # alt + w : cut text between mark and cursor
 bindkey '^U' backward-kill-line                   # ctrl + U
 bindkey '^[[3;5~' kill-word                       # ctrl + del : Kill word ahead of cursor
 bindkey '^[[3~' delete-char                       # delete
@@ -108,15 +157,10 @@ if [ -x /usr/bin/dircolors ]; then
     export LESS_TERMCAP_se=$'\E[0m'        # reset reverse video
     export LESS_TERMCAP_us=$'\E[1;32m'     # begin underline
     export LESS_TERMCAP_ue=$'\E[0m'        # reset underline
-
-    # Take advantage of $LS_COLORS for completion as well
-    zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-    zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 fi
 
-
 #####################################
-#functions
+# Functions
 #####################################
 # IP address lookup
 alias whatismyip="whatsmyip"
@@ -135,6 +179,7 @@ function whatsmyip ()
 	echo -n "External IP: "
 	curl -s ifconfig.me
 }
+
 # Copy file with a progress bar
 cpp() {
 	set -e
@@ -190,30 +235,48 @@ extract() {
 		fi
 	done
 }
+
 # Create and go to the directory
 mkdirg() {
 	mkdir -p "$1"
 	cd "$1"
 }
 
+#yazi -> y shell wrapper that provides the ability to change the current working directory when exiting Yazi.
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+
 ##########################################
 # Aliases
 ##########################################
 
-#ls aliases | using eza
-alias ls='eza -F --icons'		# use eza instead of ls
-alias la='ls -a'			# show hidden files
-
-alias l='ls -lgh'			# long listing format
-alias ll='ls -lagh'    			# long listing with hidden files
-
-alias lss='ll -s size' 			# sort by size
-alias lsd='ll -s size --total-size' 	# sort by size show the size of a directory as the size of all files and directories inside
-alias lx='ll -s extension'    		# sort by extension
-alias lt='ll -lrs modified'    		# sort by modified date
-alias lf="ll -f"  			# files only
-alias ldir="ll -D"   			# directories only
-alias lsg="ll --git --git-repos"	# show each files git status and root of git-tree status
+# Smart ls/eza Aliases
+if command -v eza >/dev/null 2>&1; then
+    # eza is installed, use eza aliases
+    alias ls='eza -F=always --icons=always'
+    alias la='ls -a'                          # show hidden files
+    alias l='ls -lgh'                         # long listing format
+    alias ll='ls -lagh'                       # long listing with hidden files
+    alias lss='ll -s size'                    # sort by size
+    alias lsd='ll -s size --total-size'       # sort by size (eza only)
+    alias lx='ll -s extension'                # sort by extension (eza only)
+    alias lt='ll -lrs modified'               # sort by modified date
+    alias lf="ll -f"                          # files only (eza only)
+    alias ldir="ll -D"                        # directories only (eza only)
+    alias lsg="ll --git --git-repos"          # git status (eza only)
+else
+    # eza is NOT installed, use standard ls aliases
+    alias ls='ls --color=auto'
+    alias la='ls -a'
+    alias l='ls -lgh'
+    alias ll='ls -lagh'
+fi
 
 # alias to show the date
 alias da='date "+%Y-%m-%d %A %T %Z"'
@@ -241,7 +304,7 @@ alias .....='cd ../../../..'
 alias bd='cd "$OLDPWD"'
 
 # Remove a directory and all files
-alias rmd='/bin/rm  --recursive --force --verbose '
+alias rmd='/bin/rm --recursive --force --verbose'
 
 # Search command line history
 alias h="history 0 | grep "
@@ -257,7 +320,7 @@ alias f="find . | grep "
 alias countfiles="for t in files links directories; do echo \`find . -type \${t:0:1} | wc -l\` \$t; done 2> /dev/null"
 
 # Show open ports
-alias openports='netstat -nape --inet'
+alias openports='ss -tulnpa'
 
 # Alias's for safe and forced reboots
 alias rebootsafe='sudo shutdown -r now'
@@ -286,28 +349,20 @@ alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' 
 alias sha1='openssl sha1'
 
 alias clickpaste='sleep 3; xdotool type "$(xclip -o -selection clipboard)"'
-#yazi -> y shell wrapper that provides the ability to change the current working directory when exiting Yazi.
-function y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		builtin cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
-}
 
-export EDITOR=micro
-export VISUAL="$EDITOR"
+#lazy
+alias lzg='lazygit'
+alias lzd='lazydocker'
+
+#############################################
+
+if [ -f /usr/bin/fastfetch ]; then
+	fastfetch
+fi
 
 # Shell integrations
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 eval "$(starship init zsh)"
 
-export PATH=$PATH:/home/neo/.spicetify
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-. "$HOME/.local/bin/env"
+#zprof
