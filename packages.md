@@ -19,16 +19,18 @@ ncdu
 # File
 fd
 yazi
+bat
+eza
+micro
 
 # Network
 vnstat
 nethogs
 iotop
 
-#terminal
-fastfetch
-micro
+# Terminal tools
 kitty
+fastfetch
 starship
 fzf
 zoxide
