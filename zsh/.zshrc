@@ -354,6 +354,11 @@ alias clickpaste='sleep 3; xdotool type "$(xclip -o -selection clipboard)"'
 alias lzg='lazygit'
 alias lzd='lazydocker'
 
+#warp
+alias warpc='warp-cli -vv connect'
+alias warpd='warp-cli -vv disconnect'
+alias warps='warp-cli -vv status'
+
 #############################################
 
 if [ -f /usr/bin/fastfetch ]; then
