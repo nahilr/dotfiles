@@ -14,7 +14,7 @@ fi
 # Set VISUAL to be the same as EDITOR
 export VISUAL="$EDITOR"
 
-#export TERM=xterm-256color
+export TERM=xterm-256color
 
 export BUN_INSTALL="$HOME/.bun"
 
@@ -24,7 +24,7 @@ path=(
     "$HOME/go/bin"
     "$HOME/.cargo/bin"
     "$HOME/.local/bin"
-    "$HOME/.spicetify"
+    "$HOME/.opencode/bin"
     $path
 )
 export PATH
@@ -34,9 +34,12 @@ if [ -f "$HOME/.local/bin/env" ]; then
     . "$HOME/.local/bin/env"
 fi
 
-#export NVM_DIR="$HOME/.nvm"
-#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# fnm
+FNM_PATH="/home/neo/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "$(fnm env --use-on-cd --shell zsh)"
+fi
 
 ######################################
 # ZINIT
