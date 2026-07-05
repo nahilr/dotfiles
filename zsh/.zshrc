@@ -66,6 +66,9 @@ zinit snippet OMZL::git.zsh
 zinit snippet OMZP::git
 zinit snippet OMZP::sudo
 zinit snippet OMZP::command-not-found
+zinit snippet OMZP::aws
+zinit snippet OMZP::bun
+zinit snippet OMZP::fnm
 
 #####################################
 # Completions
@@ -91,7 +94,15 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
 # bun completions
-[ -s "/home/neo/.bun/_bun" ] && source "/home/neo/.bun/_bun"
+#[ -s "/home/neo/.bun/_bun" ] && source "/home/neo/.bun/_bun"
+# fnm completions
+#zinit ice as"completion" id-as"fnm-completion" has"fnm" nocompile \
+#    atclone"fnm completions --shell zsh > _fnm" atpull"%atclone"
+#zinit snippet /dev/null
+# opencode completions
+zinit ice as"completion" id-as"opencode-completion" has"opencode" nocompile \
+    atclone"opencode completion > _opencode" atpull"%atclone"
+zinit snippet /dev/null
 
 # LOAD COMPLETIONS
 # autoload -Uz compinit && compinit
@@ -103,7 +114,9 @@ zinit ice atinit"zicompinit; zicdreplay"
 zinit light zsh-users/zsh-syntax-highlighting
 zinit cdreplay -q
 
-##### Shell Configs
+#####################################
+# Shell Configs
+#####################################
 # Keybindings
 bindkey -e
 bindkey '^p' history-search-backward
@@ -169,20 +182,24 @@ fi
 #####################################
 # IP address lookup
 alias whatismyip="whatsmyip"
-function whatsmyip ()
-{
-	# Internal IP Lookup.
-	if [ -e /sbin/ip ]; then
-		echo -n "Internal IP: "
-		/sbin/ip addr show wlan0 | grep "inet " | awk -F: '{print $1}' | awk '{print $2}'
-	else
-		echo -n "Internal IP: "
-		/sbin/ifconfig wlan0 | grep "inet " | awk -F: '{print $1} |' | awk '{print $2}'
-	fi
-
-	# External IP Lookup
-	echo -n "External IP: "
-	curl -s ifconfig.me
+function whatsmyip () {
+    local default_iface
+    default_iface=$(ip route show default | awk '/default/ {print $5}' | head -n 1)
+    if [ -n "$default_iface" ]; then
+        echo -n "Internal IP ($default_iface): "
+        if command -v ip >/dev/null 2>&1; then
+            ip -4 addr show dev "$default_iface" | awk '/inet/ {print $2}' | cut -d/ -f1
+        elif command -v ifconfig >/dev/null 2>&1; then
+            ifconfig "$default_iface" | awk '/inet / {print $2}'
+        else
+            echo "Networking tools (ip/ifconfig) not found."
+        fi
+    else
+        echo "Internal IP: Not connected to a network."
+    fi
+    echo -n "External IP: "
+    curl -s ifconfig.me
+    echo "" # Prints a newline so your terminal prompt doesn't get messed up
 }
 
 # Copy file with a progress bar
@@ -359,10 +376,15 @@ alias clickpaste='sleep 3; xdotool type "$(xclip -o -selection clipboard)"'
 alias lzg='lazygit'
 alias lzd='lazydocker'
 
+#tldr
+alias tldrf='tldr --list | fzf --preview "tldr {1} --color=always" --preview-window=right,70% | xargs -r tldr'
+
 #warp
 alias warpc='warp-cli -vv connect'
 alias warpd='warp-cli -vv disconnect'
 alias warps='warp-cli -vv status'
+
+alias refreshwifidriver='sudo modprobe -r iwlmvm && sudo modprobe iwlmvm'
 
 #############################################
 
@@ -371,8 +393,8 @@ if [ -f /usr/bin/fastfetch ]; then
 fi
 
 # Shell integrations
-eval "$(fzf --zsh)"
+source <(fzf --zsh)
 eval "$(zoxide init --cmd cd zsh)"
 eval "$(starship init zsh)"
 
-#zprof
+# zprof
