@@ -99,6 +99,7 @@ layout {
 
 		active-color "#505050" 
         inactive-color "#000000"
+        urgent-color "#9b0000"
         
         // active-gradient from="#80c8ff" to="#c7ff7f" angle=45
         // inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
@@ -175,13 +176,28 @@ animations {
     // slowdown 3.0
 }
 
-workspace "terminal"
-workspace "browser"
-workspace "work"
+recent-windows {
+    open-delay-ms 250
+	binds {
+	        Alt+Tab         { next-window     scope="all"; }
+	        Alt+Shift+Tab   { previous-window scope="all"; }
+	        Alt+grave       { next-window     scope="output" filter="app-id"; }
+	        Alt+Shift+grave { previous-window scope="output" filter="app-id"; }
+
+			Mod+Tab         { next-window     scope="output"; }
+			Mod+Shift+Tab   { previous-window scope="output"; }
+			Mod+grave       { next-window     scope="workspace"; }
+			Mod+Shift+grave { previous-window scope="workspace"; }
+	    }
+}
+
+workspace "1"
+workspace "2"
+workspace "3"
 
 // Set the overview wallpaper on the backdrop.
 layer-rule {
-  match namespace="^noctalia-overview*"
+  match namespace="^noctalia-backdrop"
   place-within-backdrop true
 }
 
@@ -189,15 +205,38 @@ layer-rule {
 // Window rules for all windows
 window-rule {
 	open-maximized true
+	// open-maximized-to-edges true
 	
-	geometry-corner-radius 4
+	geometry-corner-radius 5
 	clip-to-geometry true
+
+    background-effect {
+        xray true
+        blur true
+    }
 }
 
-// Work around WezTerm's initial configure bug by setting an empty default-column-width.
+// Indicate screencasted windows with red colors.
 window-rule {
-    match app-id=r#"^org\.wezfurlong\.wezterm$"#
-    default-column-width {}
+    match is-window-cast-target=true
+
+    focus-ring {
+        active-color "#f38ba8"
+        inactive-color "#7d0d2d"
+    }
+
+    border {
+        inactive-color "#7d0d2d"
+    }
+
+    shadow {
+        color "#7d0d2d70"
+    }
+
+    tab-indicator {
+        active-color "#f38ba8"
+        inactive-color "#7d0d2d"
+    }
 }
 
 // Open the Firefox picture-in-picture player as floating by default.
@@ -207,7 +246,7 @@ window-rule {
 }
 
 window-rule {
-    match app-id=r#"^brave-[a-z]*"# title="Bitwarden"
+    match app-id="brave-nngceckbapebfimnlniiiahkandclblb-Default"
     open-floating true
 }
 
@@ -229,50 +268,6 @@ binds {
     // shows a list of important hotkeys.
     Mod+Shift+Slash { show-hotkey-overlay; }
 
-    // Binds for running programs: terminal, app launcher, screen locker.
-    Mod+Return hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
-    Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
-    Mod+B { spawn-sh "brave-browser --enable-features=TouchpadOverscrollHistoryNavigation"; }
-    Mod+E { spawn "nautilus"; }
-    // Mod+V hotkey-overlay-title="Open Clipboard" { spawn-sh "cliphist list | fuzzel --match-mode fzf --dmenu | cliphist decode | wl-copy"; }
-
-    // Session
-    Ctrl+Alt+Delete {spawn-sh "qs -c noctalia-shell ipc call sessionMenu toggle"; }
-    XF86Sleep {spawn-sh "qs -c noctalia-shell ipc call sessionMenu lockAndSuspend"; }
-
-    // Example volume keys mappings for PipeWire & WirePlumber.
-    //XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+"; }
-    //XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
-    //XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
-    //XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
-
-	// Adjusting Volume using Noctalia binds
-	XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "qs -c noctalia-shell ipc call volume increase"; }
-	XF86AudioLowerVolume allow-when-locked=true { spawn-sh "qs -c noctalia-shell ipc call volume decrease"; }
-	XF86AudioMute        allow-when-locked=true { spawn-sh "qs -c noctalia-shell ipc call volume muteOutput"; }
-	XF86AudioMicMute     allow-when-locked=true { spawn-sh "qs -c noctalia-shell ipc call volume muteInput"; }
-	
-	
-    //Example brightness key mappings for brightnessctl.
-    //XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
-    //XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
-    
-    //Example brightness key mappings for brightnessctl.
-    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "qs -c noctalia-shell ipc call brightness increase"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "qs -c noctalia-shell ipc call brightness decrease"; }
-
-	// Media Control
-	//XF86AudioPlay { spawn "playerctl" "play-pause"; }
-    //XF86AudioNext { spawn "playerctl" "next"; }
-    //XF86AudioPrev { spawn "playerctl" "previous"; }
-    //XF86AudioStop { spawn "playerctl" "stop"; }
-
-    // Media Control
-	XF86AudioPlay { spawn-sh "qs -c noctalia-shell ipc call media playPause"; }
-    XF86AudioNext { spawn-sh "qs -c noctalia-shell ipc call media next"; }
-    XF86AudioPrev { spawn-sh "qs -c noctalia-shell ipc call media previous"; }
-    XF86AudioStop { spawn-sh "qs -c noctalia-shell ipc call media stop"; } 
-
     // Open/close the Overview: a zoomed-out view of workspaces and windows.
     Mod+O repeat=false { toggle-overview; }
 
@@ -287,7 +282,7 @@ binds {
     Mod+Shift+Down  { move-window-down; }
     Mod+Shift+Up    { move-window-up; }
     Mod+Shift+Right { move-column-right; }
-
+    
     // Alternative commands that move across workspaces when reaching
     // the first or last window in a column.
     // Mod+J     { focus-window-or-workspace-down; }
@@ -416,15 +411,20 @@ binds {
     // Expel the bottom window from the focused column to the right.
     Mod+Period { expel-window-from-column; }
 
+    // Cycle through widths set in preset-column-widths.
     Mod+R { switch-preset-column-width; }
     Mod+F { maximize-column; }
+
+    // Cycle through heights set in preset-column-heights.
     Mod+Shift+R { switch-preset-window-height; }
     Mod+Shift+F { reset-window-height; }
 
+    Mod+M { maximize-window-to-edges; }
     Mod+Alt+F { fullscreen-window; }
+	// Windowed (fake/detached) fullscreen
+    Mod+Ctrl+Shift+F { toggle-windowed-fullscreen; }
 
-    // Expand the focused column to space not taken up by other fully visible columns.
-    // Makes the column "fill the rest of the space".
+    // Expand the focused column to space not taken up by other fully visible columns.ie, Makes the column "fill the rest of the space".
     Mod+Ctrl+F { expand-column-to-available-width; }
 
     Mod+C { center-column; }
@@ -478,19 +478,58 @@ binds {
     // Powers off the monitors. To turn them back on, do any input like moving the mouse or pressing any other key.
     Mod+Shift+P { power-off-monitors; }
 
-    // Noctalia binds
-    Mod+Space { spawn-sh "qs -c noctalia-shell ipc call launcher toggle"; }
-    Mod+Shift+S { spawn-sh "qs -c noctalia-shell ipc call settings toggle"; }
-    Mod+S { spawn-sh "qs -c noctalia-shell ipc call controlCenter toggle"; }
-    Mod+V { spawn-sh "qs -c noctalia-shell ipc call launcher clipboard"; }
-    Mod+N { spawn-sh "qs -c noctalia-shell ipc call notifications toggleHistory";}
-    Mod+Shift+W { spawn-sh "qs -c noctalia-shell ipc call wallpaper toggle";}
-    Mod+L hotkey-overlay-title="Lock the Screen" { spawn-sh "qs -c noctalia-shell ipc call lockScreen lock"; }
-    
-}
+    // Example volume keys mappings for PipeWire & WirePlumber.
+    //XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+"; }
+    //XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
+    //XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+    //XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
 
-recent-windows {
-    open-delay-ms 250
+    //Example brightness key mappings for brightnessctl.
+    //XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
+    //XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
+    
+	// Media Control
+	//XF86AudioPlay { spawn "playerctl" "play-pause"; }
+    //XF86AudioNext { spawn "playerctl" "next"; }
+    //XF86AudioPrev { spawn "playerctl" "previous"; }
+    //XF86AudioStop { spawn "playerctl" "stop"; }
+
+	// Adjusting Volume using Noctalia ipc
+	XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "noctalia msg volume-up"; }
+	XF86AudioLowerVolume allow-when-locked=true { spawn-sh "noctalia msg volume-down"; }
+	XF86AudioMute        allow-when-locked=true { spawn-sh "noctalia msg volume-mute"; }
+	XF86AudioMicMute     allow-when-locked=true { spawn-sh "noctalia msg mic-mute"; }	
+	
+    //Adjusting brightness using Noctalia ipc
+    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "noctalia msg brightness-up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "noctalia msg brightness-down"; }
+
+    // Media Control using Noctalia ipc
+	XF86AudioPlay { spawn-sh "noctalia msg media toggle"; }
+    XF86AudioNext { spawn-sh "noctalia msg media next"; }
+    XF86AudioPrev { spawn-sh "noctalia msg media previous"; }
+    XF86AudioStop { spawn-sh "noctalia msg media stop"; } 
+
+    // Noctalia binds
+    Mod+Space { spawn-sh "noctalia msg panel-toggle launcher"; }
+    Mod+Shift+S { spawn-sh "noctalia msg settings-toggle"; }
+    Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
+    Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
+    Mod+N { spawn-sh "noctalia msg panel-toggle control-center notifications";}
+    Mod+Shift+W { spawn-sh "noctalia msg panel-toggle wallpaper";}
+    
+    // Session
+    Ctrl+Alt+Delete {spawn-sh "noctalia msg panel-toggle session"; }
+    Mod+L hotkey-overlay-title="Lock the Screen" { spawn-sh "noctalia msg session lock"; }
+    XF86Sleep {spawn-sh "noctalia msg session lock-and-suspend"; }
+	Mod+Alt+L allow-when-locked=true { spawn "swaylock"; }
+    
+    // Binds for running programs: terminal, app launcher, screen locker.
+    Mod+Return hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
+    Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+    Mod+B { spawn-sh "brave-browser --enable-features=TouchpadOverscrollHistoryNavigation"; }
+    Mod+E { spawn "nautilus"; }
+    // Mod+V hotkey-overlay-title="Open Clipboard" { spawn-sh "cliphist list | fuzzel --match-mode fzf --dmenu | cliphist decode | wl-copy"; }
 }
 
 debug {
@@ -504,5 +543,6 @@ spawn-at-startup "/usr/libexec/polkit-mate-authentication-agent-1"
 spawn-sh-at-startup "wl-paste --type text --watch cliphist store"
 spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
 
-spawn-sh-at-startup "qs -c noctalia-shell"
+spawn-sh-at-startup "noctalia"
+
 include "./noctalia.kdl"
