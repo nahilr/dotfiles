@@ -69,6 +69,7 @@ zinit snippet OMZP::command-not-found
 zinit snippet OMZP::aws
 zinit snippet OMZP::bun
 zinit snippet OMZP::fnm
+zinit snippet OMZP::tmux
 
 #####################################
 # Completions
