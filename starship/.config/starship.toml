@@ -1,4 +1,14 @@
 "$schema" = 'https://starship.rs/config-schema.json'
+
+# Timeout for commands executed by starship (ms)
+command_timeout = 5000
+
+# Timeout for starship to scan files (in milliseconds).
+scan_timeout = 5000
+
+# Disable the blank line at the start of the prompt
+# add_newline = false
+
 format = """
 [](#3B4252)\
 [$os ](bg:#3B4252 fg:#090c0c)\
@@ -8,6 +18,7 @@ $username\
 $directory\
 [](fg:#434C5E bg:#4C566A)\
 $git_branch\
+$git_commit\
 $git_status\
 [](fg:#4C566A bg:#037275)\
 $c\
@@ -26,9 +37,15 @@ $docker_context\
 $time\
 [ ](fg:#33658A)\
 """
-command_timeout = 5000
-# Disable the blank line at the start of the prompt
-# add_newline = false
+
+right_format = """
+$cmd_duration
+"""
+
+# Replace the "❯" symbol in the prompt with "➜"
+# [character]
+# success_symbol = "[   ](bold fg:blue)"
+# error_symbol = "[   ](bold fg:red)"
 
 [os]
 format = "[$symbol]($style)"
@@ -54,36 +71,42 @@ style_user = "bg:#3B4252"
 style_root = "bg:#3b2a2a"
 format = '[$user ]($style)'
 
+[hostname]
+ssh_only = false
+style = "bg:#3B4252"
+format = "[@$hostname ]($style)"
+disabled = false
+
 [directory]
 style = "bg:#434C5E"
 format = "[ $path ]($style)[$read_only]($read_only_style)"
 truncation_length = 3
 truncation_symbol = "…/"
 truncate_to_repo = false
-read_only = '󰌾'
+read_only = ''
 read_only_style = "bg:#434C5E"
-# Here is how you can shorten some long paths by text replacement
-# similar to mapped_locations in Oh My Posh:
-[directory.substitutions]
-"Documents" = " "
-"Downloads" = " "
-"Music" = " "
-"Pictures" = " "
-# Keep in mind that the order matters. For example:
-# "Important Documents" = "  "
-# will not be replaced, because "Documents" was already substituted before.
-# So either put "Important Documents" before "Documents" or use the substituted version:
-# "Important  " = "  "
+
+[git_branch]
+symbol = "󰘬"
+style = "bg:#4C566A"
+format = '[ $symbol $branch(:$remote_branch) ]($style)'
+
+[git_commit]
+style = "bg:#4C566A"
+commit_hash_length = 7
+tag_symbol = " "
+only_detached = true
+format = "[$hash$tag]($style)"
+disabled = false
+
+[git_status]
+style = "bg:#4C566A"
+format = '[$all_status$ahead_behind ]($style)'
 
 [c]
 symbol = " "
 style = "bg:#037275"
 format = '[ $symbol ($version) ]($style)'
-
-[docker_context]
-symbol = " "
-style = "bg:#06969A"
-format = '[ $symbol $context ]($style) $path'
 
 [elixir]
 symbol = " "
@@ -94,15 +117,6 @@ format = '[ $symbol ($version) ]($style)'
 symbol = " "
 style = "bg:#037275"
 format = '[ $symbol ($version) ]($style)'
-
-[git_branch]
-symbol = ""
-style = "bg:#4C566A"
-format = '[ $symbol $branch ]($style)'
-
-[git_status]
-style = "bg:#4C566A"
-format = '[$all_status$ahead_behind ]($style)'
 
 [golang]
 symbol = " "
@@ -143,8 +157,25 @@ symbol = ""
 style = "bg:#037275"
 format = '[ $symbol ($version) ]($style)'
 
+
+[docker_context]
+symbol = " "
+style = "bg:#06969A"
+format = '[ $symbol $context ]($style) $path'
+
+
 [time]
 disabled = false
 time_format = "%R" # Hour:Minute Format
 style = "bg:#33658A"
 format = '[ $time ]($style)'
+
+[cmd_duration]
+min_time = 500
+format = '[](bold fg:yellow)[󰪢 $duration](bold bg:yellow fg:black)[](bold fg:yellow)'
+
+[memory_usage]
+disabled = true
+threshold = -1
+symbol = " "
+style = "bold dimmed green"
