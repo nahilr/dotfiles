@@ -246,14 +246,22 @@ window-rule {
 }
 
 window-rule {
+    match app-id="kitty$"
+    open-on-workspace "1"
+    open-maximized-to-edges true
+}
+
+window-rule {
     match app-id="brave-nngceckbapebfimnlniiiahkandclblb-Default"
     open-floating true
 }
 
-// Example: block out two password managers from screen capture.
-/-window-rule {
+// Example: block out password managers from screen capture.
+window-rule {
     match app-id=r#"^org\.keepassxc\.KeePassXC$"#
     match app-id=r#"^org\.gnome\.World\.Secrets$"#
+    match app-id="brave-nngceckbapebfimnlniiiahkandclblb-Default"
+
 
     block-out-from "screen-capture"
 
@@ -538,11 +546,11 @@ debug {
 }
 
 // spawn-at-startup "/usr/libexec/kf6/polkit-kde-authentication-agent-1"
-spawn-at-startup "/usr/libexec/polkit-mate-authentication-agent-1"
+// spawn-at-startup "/usr/libexec/polkit-mate-authentication-agent-1"
 
 spawn-sh-at-startup "wl-paste --type text --watch cliphist store"
 spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
 
-spawn-sh-at-startup "noctalia"
+spawn-at-startup "noctalia"
 
 include "./noctalia.kdl"
