@@ -210,6 +210,8 @@ window-rule {
 	geometry-corner-radius 5
 	clip-to-geometry true
 
+    draw-border-with-background false
+    
     background-effect {
         xray true
         blur true
@@ -538,6 +540,10 @@ binds {
     Mod+B { spawn-sh "brave-browser --enable-features=TouchpadOverscrollHistoryNavigation"; }
     Mod+E { spawn "nautilus"; }
     // Mod+V hotkey-overlay-title="Open Clipboard" { spawn-sh "cliphist list | fuzzel --match-mode fzf --dmenu | cliphist decode | wl-copy"; }
+}
+
+environment {
+  QT_QPA_PLATFORMTHEME "qt6ct"
 }
 
 debug {

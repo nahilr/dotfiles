@@ -16,6 +16,12 @@ export VISUAL="$EDITOR"
 
 export TERM=xterm-256color
 
+if command -v bat >/dev/null 2>&1; then
+  export MANPAGER="bat -l man -p"
+elif command -v batcat >/dev/null 2>&1; then
+  export MANPAGER="batcat -l man -p"
+fi
+
 export BUN_INSTALL="$HOME/.bun"
 
 typeset -U path
@@ -29,16 +35,16 @@ path=(
 )
 export PATH
 
-# Source local environment file
-if [ -f "$HOME/.local/bin/env" ]; then
-    . "$HOME/.local/bin/env"
-fi
-
 # fnm
 FNM_PATH="/home/neo/.local/share/fnm"
 if [ -d "$FNM_PATH" ]; then
   export PATH="$FNM_PATH:$PATH"
   eval "$(fnm env --use-on-cd --shell zsh)"
+fi
+
+# Source local environment file
+if [ -f "$HOME/.local/bin/env" ]; then
+    . "$HOME/.local/bin/env"
 fi
 
 ######################################
@@ -59,6 +65,7 @@ source "${ZINIT_HOME}/zinit.zsh"
 # Add in zsh plugins
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-history-substring-search
 zinit light Aloxaf/fzf-tab
 
 # Add in snippets
@@ -69,7 +76,6 @@ zinit snippet OMZP::command-not-found
 zinit snippet OMZP::aws
 zinit snippet OMZP::bun
 zinit snippet OMZP::fnm
-zinit snippet OMZP::tmux
 
 #####################################
 # Completions
@@ -94,17 +100,6 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
-# bun completions
-#[ -s "/home/neo/.bun/_bun" ] && source "/home/neo/.bun/_bun"
-# fnm completions
-#zinit ice as"completion" id-as"fnm-completion" has"fnm" nocompile \
-#    atclone"fnm completions --shell zsh > _fnm" atpull"%atclone"
-#zinit snippet /dev/null
-# opencode completions
-zinit ice as"completion" id-as"opencode-completion" has"opencode" nocompile \
-    atclone"opencode completion > _opencode" atpull"%atclone"
-zinit snippet /dev/null
-
 # LOAD COMPLETIONS
 # autoload -Uz compinit && compinit
 # compinit -d ~/.cache/zcompdump
@@ -123,6 +118,9 @@ bindkey -e
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 bindkey ' ' magic-space                           # do history expansion on space
+# History substring search provided by plugin
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
 
 # deleted text is added to the kill ring (clipboard), which allows us to paste it later with Ctrl + Y
 bindkey '^[w' kill-region						  # alt + w : Delete text between mark and cursor. 
@@ -200,7 +198,7 @@ function whatsmyip () {
     fi
     echo -n "External IP: "
     curl -s ifconfig.me
-    echo "" # Prints a newline so your terminal prompt doesn't get messed up
+    echo ""
 }
 
 # Copy file with a progress bar
