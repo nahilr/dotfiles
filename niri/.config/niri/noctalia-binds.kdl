@@ -1,0 +1,29 @@
+binds {
+	// Adjusting Volume using Noctalia ipc
+	XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "noctalia msg volume-up"; }
+	XF86AudioLowerVolume allow-when-locked=true { spawn-sh "noctalia msg volume-down"; }
+	XF86AudioMute        allow-when-locked=true { spawn-sh "noctalia msg volume-mute"; }
+	XF86AudioMicMute     allow-when-locked=true { spawn-sh "noctalia msg mic-mute"; }	
+	
+    //Adjusting brightness using Noctalia ipc
+    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "noctalia msg brightness-up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "noctalia msg brightness-down"; }
+
+    // Media Control using Noctalia ipc
+    XF86AudioPlay { spawn-sh "noctalia msg media toggle"; }
+    XF86AudioNext { spawn-sh "noctalia msg media next"; }
+    XF86AudioPrev { spawn-sh "noctalia msg media previous"; }
+    XF86AudioStop { spawn-sh "noctalia msg media stop"; } 
+
+    // Noctalia binds
+    Mod+Space { spawn-sh "noctalia msg panel-toggle launcher"; }
+    Mod+Shift+S { spawn-sh "noctalia msg settings-toggle"; }
+    Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
+    Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
+    Mod+N { spawn-sh "noctalia msg panel-toggle control-center notifications";}
+    Mod+Shift+W { spawn-sh "noctalia msg panel-toggle wallpaper";}
+
+    Ctrl+Alt+Delete {spawn-sh "noctalia msg panel-toggle session"; }
+    Mod+L hotkey-overlay-title="Lock the Screen" { spawn-sh "noctalia msg session lock"; }
+    XF86Sleep {spawn-sh "noctalia msg session lock-and-suspend"; }
+}
