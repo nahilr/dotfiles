@@ -26,10 +26,11 @@ export BUN_INSTALL="$HOME/.bun"
 
 typeset -U path
 path=(
+    "$HOME/.local/bin"
+    "$HOME/bin"
     "$HOME/.bun/bin"
     "$HOME/go/bin"
     "$HOME/.cargo/bin"
-    "$HOME/.local/bin"
     "$HOME/.opencode/bin"
     $path
 )
@@ -46,6 +47,12 @@ fi
 if [ -f "$HOME/.local/bin/env" ]; then
     . "$HOME/.local/bin/env"
 fi
+
+# Android Studio Paths
+export ANDROID_HOME="/mnt/Work/Android/Sdk"
+export ANDROID_USER_HOME="/mnt/Work/Android/.android"
+export ANDROID_AVD_HOME="/mnt/Work/Android/.android/avd"
+export GRADLE_USER_HOME="/mnt/Work/Android/.gradle"
 
 ######################################
 # ZINIT
@@ -66,7 +73,6 @@ source "${ZINIT_HOME}/zinit.zsh"
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light zsh-users/zsh-history-substring-search
-zinit light Aloxaf/fzf-tab
 
 # Add in snippets
 zinit snippet OMZL::git.zsh
@@ -76,6 +82,8 @@ zinit snippet OMZP::command-not-found
 zinit snippet OMZP::aws
 zinit snippet OMZP::bun
 zinit snippet OMZP::fnm
+zinit snippet OMZP::docker
+zinit snippet OMZP::docker-compose
 
 #####################################
 # Completions
@@ -107,7 +115,8 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 # Using zinit to load completions
 zinit ice atinit"zicompinit; zicdreplay"
 
-zinit light zsh-users/zsh-syntax-highlighting
+zinit light Aloxaf/fzf-tab
+zinit light zdharma-continuum/fast-syntax-highlighting
 zinit cdreplay -q
 
 #####################################
@@ -137,20 +146,26 @@ bindkey '^[[H' beginning-of-line                  # home
 bindkey '^[[F' end-of-line                        # end
 bindkey '^[[Z' undo                               # shift + tab undo last action
 
-# History
-HISTSIZE=10000
+# History Settings
 HISTFILE=~/.histfile
-SAVEHIST=$HISTSIZE
-HISTDUP=erase
-setopt appendhistory
-setopt sharehistory
-setopt hist_ignore_space
-setopt hist_ignore_all_dups
-setopt hist_save_no_dups
-setopt hist_ignore_dups
-setopt hist_find_no_dups
-setopt extendedglob
-setopt globdots
+HISTSIZE=10000
+SAVEHIST=10000
+
+setopt sharehistory          # Share history across shells (implies appendhistory & inc_append_history)
+setopt hist_ignore_space     # Don't record commands starting with a space
+setopt hist_ignore_all_dups  # Delete old duplicate entry if new one is typed
+setopt hist_find_no_dups     # Do not display duplicates when searching history
+
+# Completion & Globbing
+setopt extendedglob          # Advanced pattern matching (#, ~, ^)
+setopt globdots              # Include dotfiles in globbing
+setopt autocd                # Auto cd when typing a directory path
+setopt auto_param_slash      # Add trailing slash on directory parameter completion
+setopt nocaseglob nocasematch # Case-insensitive matching
+
+# Terminal & Shell Options
+setopt interactive_comments  # Allow inline comments (#) in interactive shell
+stty stop undef              # Disable Ctrl+S terminal freeze
 
 # enable color support of ls, less and man, and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -201,24 +216,13 @@ function whatsmyip () {
     echo ""
 }
 
-# Copy file with a progress bar
+# Copy with progress bar
 cpp() {
-	set -e
-	strace -q -ewrite cp -- "${1}" "${2}" 2>&1 |
-		awk '{
-	count += $NF
-	if (count % 10 == 0) {
-		percent = count / total_size * 100
-		printf "%3d%% [", percent
-		for (i=0;i<=percent;i++)
-			printf "="
-			printf ">"
-			for (i=percent;i<100;i++)
-				printf " "
-				printf "]\r"
-			}
-		}
-	END { print "" }' total_size="$(stat -c '%s' "${1}")" count=0
+    if command -v rsync >/dev/null 2>&1; then
+        rsync -ah --info=progress2 "$1" "$2"
+    else
+        cp -iv "$1" "$2"
+    fi
 }
 
 # Searches for text in all files in the current folder
