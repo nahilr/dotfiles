@@ -13,7 +13,9 @@ add_newline = true
 # standalone format to get os glyph on ps1 line,
 # prompt character below
 format = """
-$os$username$hostname: $directory$git_branch$git_status$git_commit$python$cmd_duration
+$os$username$hostname: $directory$git_branch$git_status$git_commit\
+$fill\
+$python$c$golang$java$nodejs$rust$docker_context$cmd_duration
 $character
 """
 
@@ -21,6 +23,26 @@ $character
 format = "$symbol "
 success_symbol = "[❯](bold green)"
 error_symbol = "[❯](bold red)"
+
+[os]
+format = '[$symbol](bold white)'
+disabled = false
+
+[os.symbols]
+Fedora = "󰣛 "
+Kali = " "
+Alpine = " "
+Arch = " "
+Debian = " "
+Ubuntu = " "
+NixOS = " "
+Pop = " "
+Mint = "󰣭 "
+Linux = " "
+Macos = "󰀵 "
+Windows = "󰍲 "
+Android = " "
+Unknown = " "
 
 [username]
 style_user = "green bold"
@@ -36,9 +58,10 @@ disabled = false
 
 # truncation length works backwards (i.e., cwd > parent > parent ...)
 [directory]
-truncation_length = 15
+truncation_length = 5
 truncation_symbol = "…/"
 truncate_to_repo = false
+read_only = ' '
 
 [git_branch]
 truncation_length = 25
@@ -58,67 +81,9 @@ variable = "SHELL"
 default = "unknown shell"
 disabled = true
 
+[fill]
+symbol = ' '
+
 [cmd_duration]
 min_time = 500
 format = '[$duration](bold yellow)'
-
-# Show python version starting with venv
-[python]
-python_binary = ["./venv/bin/python", "python3", "python", "python2"]
-
-[aws]
-disabled = true
-
-[docker_context]
-disabled = true
-
-[gcloud]
-disabled = true
-
-[nodejs]
-disabled = true
-
-[os]
-format = '[$symbol](bold white)'
-disabled = false
-
-[os.symbols]
-Alpaquita = " "
-Alpine = " "
-Amazon = " "
-Android = " "
-Arch = " "
-Artix = " "
-CentOS = " "
-Debian = " "
-DragonFly = " "
-Emscripten = " "
-EndeavourOS = " "
-Fedora = " "
-FreeBSD = " "
-Garuda = "󰛓 "
-Gentoo = " "
-HardenedBSD = "󰞌 "
-Illumos = "󰈸 "
-Linux = " "
-Mabox = " "
-Macos = " "
-Manjaro = " "
-Mariner = " "
-MidnightBSD = " "
-Mint = " "
-NetBSD = " "
-NixOS = " "
-OpenBSD = "󰈺 "
-openSUSE = " "
-OracleLinux = "󰌷 "
-Pop = " "
-Raspbian = " "
-Redhat = " "
-RedHatEnterprise = " "
-Redox = "󰀘 "
-Solus = "󰠳 "
-SUSE = " "
-Ubuntu = " "
-Unknown = " "
-Windows = "󰍲 "
