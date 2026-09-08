@@ -1,3 +1,9 @@
+[[mgr.prepend_keymap]]
+on   = "!"
+for  = "unix"
+run  = 'shell "$SHELL" --block'
+desc = "Open $SHELL here"
+
 [[input.prepend_keymap]]
 on   = "<Esc>"
 run  = "close"

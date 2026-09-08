@@ -68,6 +68,11 @@ gestures {
     position x=1280 y=0
 }
 
+cursor {
+    xcursor-theme "Qogir-white-cursors"
+    xcursor-size 24
+}
+
 // Settings that influence how windows are positioned and sized.
 layout {
     gaps 2

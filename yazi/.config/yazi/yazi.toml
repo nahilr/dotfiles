@@ -3,13 +3,67 @@ show_hidden = true
 linemode = "size_and_mtime"
 
 [[plugin.prepend_fetchers]]
-id    = "git" # Remove if Yazi > v26.1.22
 url   = "*"
 run   = "git"
 group = "git"
 
 [[plugin.prepend_fetchers]]
-id    = "git" # Remove if Yazi > v26.1.22
 url   = "*/"
 run   = "git"
 group = "git"
+
+[plugin]
+  prepend_preloaders = [
+    # Replace magick, image, video with mediainfo
+    { mime = "{audio,video,image}/*", run = "mediainfo" },
+    # .srt subtitle, adobe illustrator, adobe photoshop file
+    { mime = "application/{subrip,postscript,illustrator,dvb.ait,vnd.adobe.illustrator,eps}", run = "mediainfo" },
+
+    # Sometimes AI file is recognized as "application/pdf". Lmao.
+    # In this case use file extension instead:
+    { url = "*.{ai,eps,ait}", run = "mediainfo" },
+
+    # Hide metadata by default.
+    # Example for image mimetype:
+    { mime = "{image}/*", run = "mediainfo --no-metadata" },
+
+    # Hide image preview by default.
+    # Example for video mimetype:
+    { mime = "{video}/*", run = "mediainfo --no-preview" },
+
+    # NOTE: Use both --no-metadata and --no-preview will display nothing. :)
+    # Make sure both of your previewers and preloaders has the same arguments (--no-metadata and --no-preview)
+  ]
+
+  prepend_previewers = [
+    # Replace magick, image, video with mediainfo
+    { mime = "{audio,video,image}/*", run = "mediainfo"},
+    # .srt subtitle, adobe illustrator, adobe photoshop file
+    { mime = "application/{subrip,postscript,illustrator,dvb.ait,vnd.adobe.illustrator,eps}", run = "mediainfo" },
+
+    # Sometimes AI file is recognized as "application/pdf". Lmao.
+    # In this case use file extension instead:
+    { url = "*.{ai,eps,ait}", run = "mediainfo" },
+
+    # Hide metadata by default.
+    # Example for image mimetype:
+    { mime = "{image}/*", run = "mediainfo --no-metadata" },
+
+    # Hide image preview by default.
+    # Example for video mimetype:
+    { mime = "{video}/*", run = "mediainfo --no-preview" },
+
+    # NOTE: Use both --no-metadata and --no-preview will display nothing. :)
+    # Make sure both of your previewers and preloaders has the same arguments (--no-metadata and --no-preview)
+  ]
+
+  # There are more extensions, mime types which are supported by mediainfo.
+  # Just add file's MIME type to `previewers`, `preloaders` above.
+  # https://mediaarea.net/en/MediaInfo/Support/Formats
+  # If it's not working, file an issue at https://github.com/boydaihungst/mediainfo.yazi/issues
+
+# For a large file like Adobe Illustrator, Adobe Photoshop, etc
+# you may need to increase the memory limit if no image is rendered.
+# https://yazi-rs.github.io/docs/configuration/yazi#tasks
+[tasks]
+  image_alloc      = 1073741824        # = 1024*1024*1024 = 1024MB
