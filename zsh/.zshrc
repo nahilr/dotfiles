@@ -88,10 +88,12 @@ zinit snippet OMZP::docker-compose
 #####################################
 # Completions
 #####################################
-# Load completions styling
-zstyle ':completion:*:*:*:*:*' menu select
+# Load completion styling and behavior
+zstyle ':completion:*' menu select
+zstyle ':completion:*' select-scroll 0
+zstyle ':completion:*' list-dirs-first true
 zstyle ':completion:*' auto-description 'specify: %d'
-zstyle ':completion:*' completer _expand _complete
+zstyle ':completion:*' completer _expand _complete _ignored
 zstyle ':completion:*' format 'Completing %d'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
@@ -269,12 +271,11 @@ mkdirg() {
 
 #yazi -> y shell wrapper that provides the ability to change the current working directory when exiting Yazi.
 function y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		builtin cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
+	local tmp cwd; tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
+	command rm -f -- "$tmp"
 }
 
 ##########################################

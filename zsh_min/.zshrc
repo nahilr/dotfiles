@@ -15,40 +15,16 @@ fi
 export VISUAL="$EDITOR"
 
 export TERM=xterm-256color
-######################################
-# ZINIT
-######################################
-# Set the directory we want to store zinit and plugins
-ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
-
-# Download Zinit, if it's not there yet
-if [ ! -d "$ZINIT_HOME" ]; then
-   mkdir -p "$(dirname $ZINIT_HOME)"
-   git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
-fi
-
-# Source/Load zinit
-source "${ZINIT_HOME}/zinit.zsh"
-
-# Add in zsh plugins
-zinit light zsh-users/zsh-completions
-zinit light zsh-users/zsh-autosuggestions
-zinit light Aloxaf/fzf-tab
-
-# Add in snippets
-zinit snippet OMZL::git.zsh
-zinit snippet OMZP::git
-zinit snippet OMZP::sudo
-zinit snippet OMZP::command-not-found
-zinit snippet OMZP::tmux
 
 #####################################
 # Completions
 #####################################
-# Load completions styling
-zstyle ':completion:*:*:*:*:*' menu select
+# Load completion styling and behavior
+zstyle ':completion:*' menu select
+zstyle ':completion:*' select-scroll 0
+zstyle ':completion:*' list-dirs-first true
 zstyle ':completion:*' auto-description 'specify: %d'
-zstyle ':completion:*' completer _expand _complete
+zstyle ':completion:*' completer _expand _complete _ignored
 zstyle ':completion:*' format 'Completing %d'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
@@ -61,19 +37,39 @@ zstyle ':completion:*' verbose true
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 
-# fzf-tab styling
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+# Load the built-in completion system.
+autoload -Uz compinit
+compinit -d ~/.cache/zcompdump
 
-# LOAD COMPLETIONS
-# autoload -Uz compinit && compinit
-# compinit -d ~/.cache/zcompdump
+# Optional system integrations
+if [ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+	source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+	ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
+	ZSH_HIGHLIGHT_STYLES[default]='none'
+	ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=red,bold,underline'
+	ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=cyan,bold'
+	ZSH_HIGHLIGHT_STYLES[precommand]='fg=green,bold'
+	ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=blue,bold'
+	ZSH_HIGHLIGHT_STYLES[arg0]='fg=cyan'
+	ZSH_HIGHLIGHT_STYLES[path]='bold'
+	ZSH_HIGHLIGHT_STYLES[globbing]='fg=blue,bold'
+	ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=green'
+	ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=green'
+	ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=yellow'
+	ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=yellow'
+	ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=yellow'
+	ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]='fg=magenta,bold'
+	ZSH_HIGHLIGHT_STYLES[process-substitution-delimiter]='fg=magenta,bold'
+	ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=blue,bold'
+	ZSH_HIGHLIGHT_STYLES[comment]='fg=black,bold'
+	ZSH_HIGHLIGHT_STYLES[bracket-error]='fg=red,bold'
+	ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]='standout'
+fi
 
-# Using zinit to load completions
-zinit ice atinit"zicompinit; zicdreplay"
-
-zinit light zsh-users/zsh-syntax-highlighting
-zinit cdreplay -q
+if [ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+	source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'
+fi
 
 #####################################
 # Shell Configs
@@ -99,20 +95,26 @@ bindkey '^[[H' beginning-of-line                  # home
 bindkey '^[[F' end-of-line                        # end
 bindkey '^[[Z' undo                               # shift + tab undo last action
 
-# History
-HISTSIZE=10000
+# History Settings
 HISTFILE=~/.histfile
-SAVEHIST=$HISTSIZE
-HISTDUP=erase
-setopt appendhistory
-setopt sharehistory
-setopt hist_ignore_space
-setopt hist_ignore_all_dups
-setopt hist_save_no_dups
-setopt hist_ignore_dups
-setopt hist_find_no_dups
-setopt extendedglob
-setopt globdots
+HISTSIZE=10000
+SAVEHIST=10000
+
+setopt sharehistory          # Share history across shells (implies appendhistory & inc_append_history)
+setopt hist_ignore_space     # Don't record commands starting with a space
+setopt hist_ignore_all_dups  # Delete old duplicate entry if new one is typed
+setopt hist_find_no_dups     # Do not display duplicates when searching history
+
+# Completion & Globbing
+setopt extendedglob          # Advanced pattern matching (#, ~, ^)
+setopt globdots              # Include dotfiles in globbing
+setopt autocd                # Auto cd when typing a directory path
+setopt auto_param_slash      # Add trailing slash on directory parameter completion
+setopt nocaseglob nocasematch # Case-insensitive matching
+
+# Terminal & Shell Options
+setopt interactive_comments  # Allow inline comments (#) in interactive shell
+stty stop undef              # Disable Ctrl+S terminal freeze
 
 # enable color support of ls, less and man, and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -227,12 +229,11 @@ mkdirg() {
 
 #yazi -> y shell wrapper that provides the ability to change the current working directory when exiting Yazi.
 function y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		builtin cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
+	local tmp cwd; tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
+	command rm -f -- "$tmp"
 }
 
 ##########################################
