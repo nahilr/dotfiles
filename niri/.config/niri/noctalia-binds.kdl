@@ -17,11 +17,14 @@ binds {
 
     // Noctalia binds
     Mod+Space { spawn-sh "noctalia msg panel-toggle launcher"; }
-    Mod+Shift+S { spawn-sh "noctalia msg settings-toggle"; }
-    Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
+    Mod+Comma { spawn-sh "noctalia msg settings-toggle"; }
+    Mod+A { spawn-sh "noctalia msg panel-toggle control-center"; }
     Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
     Mod+N { spawn-sh "noctalia msg panel-toggle control-center notifications";}
     Mod+Shift+W { spawn-sh "noctalia msg panel-toggle wallpaper";}
+    Mod+Alt+W { spawn-sh "noctalia msg wallpaper-random"; }
+    Mod+Shift+S { spawn-sh "noctalia msg screenshot-region"; }
+    Mod+Alt+S { spawn-sh "noctalia msg annotate"; }
 
     Ctrl+Alt+Delete {spawn-sh "noctalia msg panel-toggle session"; }
     Mod+L hotkey-overlay-title="Lock the Screen" { spawn-sh "noctalia msg session lock"; }

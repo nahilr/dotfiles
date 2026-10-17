@@ -196,6 +196,13 @@ recent-windows {
 	    }
 }
 
+blur {
+  passes 2        // more passes = stronger blur (default: 3)
+  offset 3.0      // sample distance per pass (default: 3.0)
+  noise 0.03      // grain overlay (default: 0.02)
+  saturation 1.0  // color saturation boost (default: 1.5)
+}
+
 workspace "1"
 workspace "2"
 workspace "3"
@@ -204,6 +211,13 @@ workspace "3"
 layer-rule {
   match namespace="^noctalia-backdrop"
   place-within-backdrop true
+}
+layer-rule {
+  match namespace="^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd)$"
+  background-effect {
+    xray false
+    // blur false
+  }
 }
 
 // Window rules let you adjust behavior for individual windows.
@@ -218,28 +232,23 @@ window-rule {
     draw-border-with-background false
     
     background-effect {
-        xray true
+        xray false
         blur true
     }
 }
-
 // Indicate screencasted windows with red colors.
 window-rule {
     match is-window-cast-target=true
-
     focus-ring {
         active-color "#f38ba8"
         inactive-color "#7d0d2d"
     }
-
     border {
         inactive-color "#7d0d2d"
     }
-
     shadow {
         color "#7d0d2d70"
     }
-
     tab-indicator {
         active-color "#f38ba8"
         inactive-color "#7d0d2d"
@@ -254,16 +263,20 @@ window-rule {
 
 window-rule {
     match app-id="kitty$"
-    open-on-workspace "1"
-    open-maximized-to-edges true
-}
-window-rule {
     match app-id="VirtualBox Machine"
-    open-maximized true
+    
+    open-maximized-to-edges true
 }
 
 window-rule {
+    match app-id=r#"^org\.gnome\.Calculator$"#
+    match app-id=r#"^gnome-calculator$"#
+    match app-id=r#"^galculator$"#
+    match app-id=r#"^xdg-desktop-portal$"#
     match app-id="brave-nngceckbapebfimnlniiiahkandclblb-Default"
+    match app-id="org.gnome.NautilusPreviewer"
+    match app-id="^Android Emulator -"
+    
     open-floating true
 }
 

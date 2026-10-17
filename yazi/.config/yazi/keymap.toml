@@ -13,3 +13,12 @@ desc = "Cancel input"
 on   = [ "g", "s" ]
 run  = "plugin vcs-files"
 desc = "Show Git file changes"
+
+[[mgr.prepend_keymap]]
+on   = "<Enter>"
+run  = "plugin smart-enter"
+desc = "Enter the child directory, or open the file"
+
+[[mgr.prepend_keymap]]
+on  = "y"
+run = [ 'shell -- for path in %s; do echo "file://$path"; done | wl-copy -t text/uri-list', "yank" ]

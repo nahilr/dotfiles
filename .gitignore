@@ -1,0 +1,3 @@
+# Yazi plugins and flavors (managed via package.toml)
+yazi/.config/yazi/plugins/
+yazi/.config/yazi/flavors/

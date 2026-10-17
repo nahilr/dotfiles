@@ -1,6 +1,11 @@
 -- Plugins
 require("full-border"):setup()
 require("git"):setup()
+require("githead"):setup({
+  branch_prefix = "on",
+  branch_symbol = " ",
+  branch_borders = "()",
+})
 
 -- Show symlink in status bar
 Status:children_add(function(self)

@@ -30,7 +30,7 @@ disabled = false
 
 [os.symbols]
 Fedora = "󰣛 "
-Kali = " "
+Kali = "  "
 Alpine = " "
 Arch = " "
 Debian = " "
