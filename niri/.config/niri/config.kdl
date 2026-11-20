@@ -232,8 +232,13 @@ window-rule {
     draw-border-with-background false
     
     background-effect {
-        xray false
+        xray true
         blur true
+    }
+    popups {
+    	background-effect {
+        	blur true
+        }
     }
 }
 // Indicate screencasted windows with red colors.

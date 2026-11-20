@@ -37,6 +37,11 @@ zstyle ':completion:*' verbose true
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 
+# fzf-tab styling
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:*' query-string input
+
 # Load the built-in completion system.
 autoload -Uz compinit
 compinit -d ~/.cache/zcompdump
@@ -97,8 +102,8 @@ bindkey '^[[Z' undo                               # shift + tab undo last action
 
 # History Settings
 HISTFILE=~/.histfile
-HISTSIZE=10000
-SAVEHIST=10000
+HISTSIZE=50000
+SAVEHIST=50000
 
 setopt sharehistory          # Share history across shells (implies appendhistory & inc_append_history)
 setopt hist_ignore_space     # Don't record commands starting with a space
@@ -232,7 +237,12 @@ function y() {
 	local tmp cwd; tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
 	command yazi "$@" --cwd-file="$tmp"
 	IFS= read -r -d '' cwd < "$tmp"
-	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
+	if [ "$cwd" != "$PWD" ] && [ -d "$cwd" ]; then
+		builtin cd -- "$cwd"
+		command zoxide add "$cwd"  # Feeds the path to zoxide
+	else
+		builtin true
+	fi
 	command rm -f -- "$tmp"
 }
 

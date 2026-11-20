@@ -109,6 +109,7 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 # fzf-tab styling
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:*' query-string input
 
 # LOAD COMPLETIONS
 # autoload -Uz compinit && compinit
@@ -274,13 +275,20 @@ function y() {
 	local tmp cwd; tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
 	command yazi "$@" --cwd-file="$tmp"
 	IFS= read -r -d '' cwd < "$tmp"
-	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
+	if [ "$cwd" != "$PWD" ] && [ -d "$cwd" ]; then
+		builtin cd -- "$cwd"
+		command zoxide add "$cwd"  # Feeds the path to zoxide
+	else
+		builtin true
+	fi
 	command rm -f -- "$tmp"
 }
 
 ##########################################
 # Aliases
 ##########################################
+
+unalias which 2>/dev/null
 
 # Smart ls/eza Aliases
 if command -v eza >/dev/null 2>&1; then
@@ -316,7 +324,6 @@ alias ping='ping -c 10'
 alias less='less -R'
 alias cls='clear'
 alias multitail='multitail --no-repeat -c'
-
 
 # Change directory aliases
 alias home='cd ~'
